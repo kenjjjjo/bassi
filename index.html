@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>マリオ風ミニゲーム</title>
+  <style>
+    canvas {
+      background: skyblue;
+      display: block;
+      margin: 0 auto;
+    }
+    .controls {
+      text-align: center;
+      margin-top: 10px;
+    }
+    button {
+      font-size: 24px;
+      padding: 10px 20px;
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="gameCanvas" width="480" height="320"></canvas>
+
+<div class="controls">
+  <button id="leftBtn">←</button>
+  <button id="jumpBtn">ジャンプ</button>
+  <button id="rightBtn">→</button>
+</div>
+
+<script>
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
+
+  const player = {
+    x: 50,
+    y: 240,
+    width: 30,
+    height: 30,
+    vx: 0,
+    vy: 0,
+    onGround: false
+  };
+
+  const gravity = 0.6;
+  const jumpPower = -10;
+  const moveSpeed = 3;
+
+  const groundHeight = 50;
+
+  let keys = { left: false, right: false, jump: false };
+
+  document.getElementById("leftBtn").ontouchstart = () => keys.left = true;
+  document.getElementById("rightBtn").ontouchstart = () => keys.right = true;
+  document.getElementById("jumpBtn").ontouchstart = () => {
+    if (player.onGround) {
+      player.vy = jumpPower;
+      player.onGround = false;
+    }
+  };
+  document.getElementById("leftBtn").ontouchend = () => keys.left = false;
+  document.getElementById("rightBtn").ontouchend = () => keys.right = false;
+
+  function update() {
+    // 横移動
+    player.vx = 0;
+    if (keys.left) player.vx = -moveSpeed;
+    if (keys.right) player.vx = moveSpeed;
+    player.x += player.vx;
+
+    // 重力とジャンプ
+    player.vy += gravity;
+    player.y += player.vy;
+
+    // 地面との接触
+    if (player.y + player.height >= canvas.height - groundHeight) {
+      player.y = canvas.height - groundHeight - player.height;
+      player.vy = 0;
+      player.onGround = true;
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // プレイヤー
+    ctx.fillStyle = "red";
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+
+    // 地面
+    ctx.fillStyle = "green";
+    ctx.fillRect(0, canvas.height - groundHeight, canvas.width, groundHeight);
+  }
+
+  function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+  }
+
+  gameLoop();
+</script>
+
+</body>
+</html>
